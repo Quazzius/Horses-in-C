@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1558059569 source:c:\cprogramming-cpp\firstproject\main.c
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+
+1558113811 source:c:\cprogramming-cpp\firstproject\horses-in-c\main.c
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+
