@@ -4,13 +4,17 @@
 #define SIZE 6
 
 /*this program simulates the dice game "horses"*/
-int *rollDice(); //prototypes
+//needs dice keeping option
+//needs rebuttle for past payers that did not lose
+int *rollDice(int); //prototypes
 void play(int);
 char *nextPlayer(int,int,int);
+int keepDice();
 
 //global variables
 int score[3] = {0,0,0};
 int playcount = 0;
+int *p;
 
 int main()
 {
@@ -35,36 +39,51 @@ int main()
     }
 }
 // roll them  dice
-int * rollDice()
+int * rollDice(int kept)
 {
     static int dice[SIZE];
-    for (int i = 0; i < SIZE; i++)
+    for (; kept < SIZE; kept++)
     {
-        dice[i] = 1+ (rand()%6);
+        dice[kept] = 1+ (rand()%6);
     }
+    //output rolled dice
     for(int i = 0; i < SIZE; i++)
     {
         printf("%3d", dice[i]);
     }
+
     return dice;
 }
 void play(int players)
 {
     int count = 0;
-    int *p;
     char keep = 'n';
+    int kept = 0;
+    //keep rolling
     for (; keep == 'n' && count < 3; count++)
     {
-        puts("roll'em!");
-        //first roll function
-        p = rollDice();
-        //prompt to continue
+        puts("\nroll'em!");
+        // roll dice function
+        p = rollDice(kept);
+         //user can keep however many dice per turn
+        puts("\nkeep any of these dice?\ny/n");
+        char pick = 'n';
+        scanf ("%s",&pick);
+        if (pick == 'y'){
+            kept = keepDice(p);
+    }
+        //prompt to if they want to  stay with their hand
         if (count < 3)
         {
-            puts("\nkeep?\ny/n?");
+            puts("\nStay?\ny/n?");
             scanf("%s", &keep);
         }
     }
+    //test print after keep decision
+     printf("test print array:");
+        for (int i = 0; i < SIZE; i++){
+            printf("%d ", *(p+i));
+        }
     //count amounts of repeating values
     int most[SIZE] = {0,0,0,0,0,0};
     for (int i = 0; i < SIZE; i++)
@@ -91,7 +110,7 @@ void play(int players)
         }
 
         }
-         printf("test print:");
+         printf("\ntest print totals:");
         for (int i = 0; i < SIZE; i++){
             printf("%d ", most[i]);
     }
@@ -142,7 +161,6 @@ void play(int players)
 }
 //next player's score compared to first player
 char *nextPlayer(int nCount, int num, int ct){
-
     if (score[2] < ct){
        return "you lose!";
     }
@@ -150,7 +168,7 @@ char *nextPlayer(int nCount, int num, int ct){
         if(score[1] > num){
             return "you lose!";
         }
-        else if(score[1] == num){
+        else if(score[1] == num && score[2] == ct){
           return "tie!";
 
         }
@@ -161,8 +179,14 @@ char *nextPlayer(int nCount, int num, int ct){
             return "you win! - new score set";
         }
     }
+    else if(score[2] > ct && score[1] < num){
+        score[0] = nCount;
+        score[1] = num;
+        score[2] = ct;
+        return "you win! - new score set";
+    }
     else if (score[0] < nCount){
-       score[0] = nCount;
+        score[0] = nCount;
         score[1] = num;
         score[2] = ct;
         return "you win! - new score set";
@@ -171,5 +195,29 @@ char *nextPlayer(int nCount, int num, int ct){
     else{
         return "you lose!";
     }
+}
+//user can keep all of a single number per roll.
+int keepDice(int dice[]){
+    puts("keep which number?");
+    int number = 0;
+    scanf("%d",&number);
+
+    //loop to find all dice for requested number
+    int count = 0;
+    for (int i = 0; i < SIZE; i++){
+        if (dice[i] == number){
+            count++;
+        }
+    }
+    //assign number to first part of array to not be re-rolled
+    for (int i = 0; i < count; i++){
+        dice[i] = number;
+    }
+    //clear remaining spots so as not to  be added into final count
+    for (int i = count; i < SIZE; i++){
+        dice[i] = 0;
+    }
+    printf("Kept %d %d's",count, number);
+    return count;
 }
 
