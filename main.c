@@ -3,8 +3,16 @@
 #include<limits.h>
 #define SIZE 6
 
-/*this program simulates the dice game "horses"*/
-//needs dice keeping option
+/*this program simulates the dice game "horses"
+the first player sets the mark and the next players have to match or beat
+the first players mark. the score is set buy multiples of the same number
+ and the player can keep however many of the same number per roll.
+ ex: rolled 65463, player can keep whatever but if user picks 6, they keep both 6s.
+ multiples beat out numbers. ex: three 1s beat out two 6s.
+ the amount of rolls is important as whomever sets the mark also sets the amount
+ of rolls it took to make it. ex: p1 rolled 3 6s in 2 rolls. p2 only
+ gets up to 2 rolls to beat this score etc...*/
+//make betting?
 //needs rebuttle for past payers that did not lose
 int *rollDice(int); //prototypes
 void play(int);
