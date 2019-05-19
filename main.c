@@ -5,18 +5,19 @@
 
 /*this program simulates the dice game "horses"
 the first player sets the mark and the next players have to match or beat
-the first players mark. the score is set buy multiples of the same number
+the first players mark. the score is set by multiples of the same number
  and the player can keep however many of the same number per roll.
  ex: rolled 65463, player can keep whatever but if user picks 6, they keep both 6s.
  multiples beat out numbers. ex: three 1s beat out two 6s.
  the amount of rolls is important as whomever sets the mark also sets the amount
  of rolls it took to make it. ex: p1 rolled 3 6s in 2 rolls. p2 only
  gets up to 2 rolls to beat this score etc...*/
+
 //make betting?
 //needs rebuttle for past payers that did not lose
 int *rollDice(int); //prototypes
-void play(int);
-char *nextPlayer(int,int,int);
+int * play(int,int[]);
+int *nextPlayer(int,int,int);
 int keepDice();
 
 //global variables
@@ -26,6 +27,7 @@ int *p;
 
 int main()
 {
+    int *pNum;
     char again = 'y';
     //keep playing loop
     while (again == 'y'){
@@ -35,11 +37,47 @@ int main()
         puts("how many players?");
         scanf("%d",&players);
 
+        //make array of players
+        int playerNumber[players];
+        for (int p = 0; p < players; p++){
+           playerNumber[p] = 1; //set player's win status
+        }
+        //loop through amount of players
         for (int j = 0; j < players; j++)
         {
             //play game
-            play(players);
+          pNum = play(players, playerNumber);
         }
+        //rebuttle for player that did not lose but have not beaten the high score
+        //cycle to find those who didn't lose on an roll
+        int winner = 0;
+        int rebuttle = 1;
+        while (rebuttle > 0){
+            puts("\n**rebuttles**\n");
+            rebuttle = 0;
+            //how many players are left?
+            for (int j = 0; j < players; j++){
+                if (*(pNum + j) == 1){
+                    winner = j+1;//store current player in case of win
+                    rebuttle++;
+                }
+            }
+            //1 player left = winner
+            if (rebuttle == 1){
+                printf("Winner: Player %d", winner);
+                rebuttle = 0;
+            }
+            //previous winning players keep playing
+            else{
+                for (int i = 0; i < rebuttle; i++){
+                    if (*(pNum + i) == 1){
+                        puts("next players turn\n");
+                        *(pNum + i) = play(rebuttle, playerNumber);
+                    }
+                }
+            }
+        }
+
         //play another round
         playcount = 0;
         puts("\nplay again?\ny/n?");
@@ -62,7 +100,8 @@ int * rollDice(int kept)
 
     return dice;
 }
-void play(int players)
+//game-play structure
+int * play(int players, int playerNumber[])
 {
     int count = 0;
     char keep = 'n';
@@ -87,12 +126,7 @@ void play(int players)
             scanf("%s", &keep);
         }
     }
-    //test print after keep decision
-     printf("test print array:");
-        for (int i = 0; i < SIZE; i++){
-            printf("%d ", *(p+i));
-        }
-    //count amounts of repeating values
+    //count amounts of repeating dice values
     int most[SIZE] = {0,0,0,0,0,0};
     for (int i = 0; i < SIZE; i++)
     {
@@ -118,10 +152,6 @@ void play(int players)
         }
 
         }
-         printf("\ntest print totals:");
-        for (int i = 0; i < SIZE; i++){
-            printf("%d ", most[i]);
-    }
     //find number with highest duplicate amount
     //if tied, the duplicate with the highest number is chosen
     int number = 0;
@@ -157,51 +187,59 @@ void play(int players)
         score[1] = number;
         score[2] = count;
     }
-    //compare score
+    //compare score, return comparison status
     else{
-        printf("\n %s",nextPlayer(numCount,number,count));
+      playerNumber[playcount] = nextPlayer(numCount,number,count);
     }
     playcount++;
     if (playcount < players){
-        puts("\n\nNext player");
+        printf("\nplayer %d's turn", (playcount + 1));
     }
+    return playerNumber;
 
 }
 //next player's score compared to first player
-char *nextPlayer(int nCount, int num, int ct){
+int *nextPlayer(int nCount, int num, int ct){
     if (score[2] < ct){
-       return "you lose!";
+       puts("you lose!");
+       return (int*)0;
     }
     else if(score[0] == nCount){
         if(score[1] > num){
-            return "you lose!";
+            puts("you lose!");
+            return (int*)0;
         }
         else if(score[1] == num && score[2] == ct){
-          return "tie!";
+          puts("tie! - push");
+          return (int*)1;
 
         }
         else{
             score[0] = nCount;
             score[1] = num;
             score[2] = ct;
-            return "you win! - new score set";
+            puts("you win! - new score set");
+            return (int*)1;
         }
     }
     else if(score[2] > ct && score[1] < num){
         score[0] = nCount;
         score[1] = num;
         score[2] = ct;
-        return "you win! - new score set";
+        puts("you win! - new score set");
+        return (int*)1;
     }
     else if (score[0] < nCount){
         score[0] = nCount;
         score[1] = num;
         score[2] = ct;
-        return "you win! - new score set";
+        puts("you win! - new score set");
+        return (int*)1;
 
     }
     else{
-        return "you lose!";
+        puts("you lose!");
+        return (int*)0;
     }
 }
 //user can keep all of a single number per roll.
