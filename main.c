@@ -4,20 +4,22 @@
 #define SIZE 6
 
 /*this program simulates the dice game "horses"
-the first player sets the mark and the next players have to match or beat
-the first players mark. the score is set by multiples of the same number
- and the player can keep however many of the same number per roll.
+this game supports up to 10  players.the first player sets the mark and
+the next players have to match or beat the first players mark. the score is set
+by multiples of the same number and the player can keep however many of the same number per roll.
  ex: rolled 65463, player can keep whatever but if user picks 6, they keep both 6s.
  multiples beat out numbers. ex: three 1s beat out two 6s.
  the amount of rolls is important as whomever sets the mark also sets the amount
  of rolls it took to make it. ex: p1 rolled 3 6s in 2 rolls. p2 only
- gets up to 2 rolls to beat this score etc...*/
+ gets up to 2 rolls to beat this score. players keep  playing until there is 1 left.
+ each  player starts with $5 each round and has to put a dollar into the pool for each
+ turn, the total winnings are calculated at the end of each round*/
 
 //make betting?
 
 //prototypes
 int *rollDice(int);
-int * play(int, int[]);
+int * play(int, int[], int);
 int *nextPlayer(int,int,int);
 int keepDice();
 
@@ -30,53 +32,73 @@ int main()
 {
     int *pNum;
     char again = 'y';
+    int players = 0;
+    int total[10] = {0,0,0,0,0,0,0,0,0,0};
     //keep playing loop
     while (again == 'y'){
+        int pool = 0;
         srand(time(NULL));
-        int players = 0;
         //choose players
-        puts("how many players?");
-        scanf("%d",&players);
-
-        //make array of players
-        int playerNumber[players];
-        for (int p = 0; p < players; p++){
-           playerNumber[p] = 1; //set player's status
+        if (playcount == 0){
+            puts("how many players?");
+            scanf("%d",&players);
         }
+            //make array of players and cash
+        int playerNumber[players];
+        int dollar[players];
+        for (int p = 0; p < players; p++){
+            dollar[p] = 5; //set players cash
+            playerNumber[p] = 1; //set player's status
+        }
+        playcount = 0;
+        pool += players;//ante up
         //loop through amount of players
         for (int j = 0; j < players; j++)
         {
-            //play game
-          pNum = play(j, playerNumber);
+            //each player takes a first turn and adds a dollar to the pool
+            dollar[j]--;
+            pNum = play(j, playerNumber, dollar[j]);
         }
         //rebuttle for player that did not lose but have not beaten the high score
         //cycle to find those who didn't lose on an roll
         int sum = 0;
+        int wintext = 0;
         while (sum != 1){
             sum = 0;
             int win = 0;
             for (int i = 0; i < players; i++){
-                if (*(pNum + i) == 1){
-                    sum++;
-                    win = i;
+                if (sum == 1 && wintext == 0){
+                    printf("\nplayer %d wins %d dollars!\n",win +1, pool);
+                    *(pNum+win) = 2;
+                    dollar[win] += pool;
+                    wintext++;//stops repeat print
                 }
-                printf("test. scores: p%d - %d\n",i+1,*(pNum+i));
-            }
-            if (sum == 1){
-                printf("player %d wins!",win +1);
-            }
-            else{
-
-                for (int j = 0; j < players; j++){
-                    if (*(pNum + j) == 1){
-                        pNum = play(j,pNum);
+                else{
+                    if (*(pNum + i) == 1){
+                        pool++;
+                        dollar[i]--;
+                        pNum = play(i,pNum,dollar[i]);
+                        }
+                        //check player status again
+                        for (int j = 0; j < players; j++){
+                            if (*(pNum + j) == 1){
+                            sum++;
+                            win = j;
+                        }
                     }
                 }
             }
         }
+        //calculate totals
+        for (int t = 0; t < players; t++){
+            total[t] += dollar[t] - 5;
+        }
 
-        //play another round
-        playcount = 0;
+        puts("total winnings:\n");
+        for (int k = 0; k < players; k++){
+            printf("player %d - $%d\n",k + 1, total[k]);
+        }
+        //play another round with same players
         puts("\nplay again?\ny/n?");
         scanf("%s",&again);
     }
@@ -98,26 +120,21 @@ int * rollDice(int kept)
     return dice;
 }
 //game-play structure
-int * play(int player, int playerNumber[])
+int * play(int player, int playerNumber[], int dollar)
 {
-    printf("\nplayer %d's turn\n", player + 1);
+    printf("\nplayer %d's turn\n$%d", player + 1, dollar);
 
-    int count = 0;
+    int count = 0;//how many rolls
     char keep = 'n';
-    int kept = 0;
+    int kept = 0; //number to keep
     //keep rolling
     for (; keep == 'n' && count < 3; count++)
     {
         puts("\nroll'em!");
         // roll dice function
         p = rollDice(kept);
-         //user can keep however many dice per turn
-        puts("\nkeep any of these dice?\ny/n");
-        char pick = 'n';
-        scanf ("%s",&pick);
-        if (pick == 'y'){
-            kept = keepDice(p);
-    }
+         //user picks number to keep from roll
+        kept = keepDice(p);
         //prompt to if they want to  stay with their hand
         if (count < 3)
         {
@@ -198,49 +215,49 @@ int * play(int player, int playerNumber[])
 int *nextPlayer(int nCount, int num, int ct){
     if (score[2] < ct){
        puts("you lose!");
-       return 0;
+       return (int*)0;
     }
     else if(score[0] == nCount){
         if(score[1] > num){
             puts("you lose!");
-            return 0;
+            return (int*)0;
         }
         else if(score[1] == num && score[2] == ct){
           puts("tie! - push");
-          return 1;
+          return (int*)1;
 
         }
         else{
             score[0] = nCount;
             score[1] = num;
             score[2] = ct;
-            puts("you win! - new score set");
-            return 1;
+            puts("New high score set");
+            return (int*)1;
         }
     }
-    else if(score[2] > ct && score[1] < num){
+    else if(score[2] > ct && score[1] < num && score[0] <= nCount){
         score[0] = nCount;
         score[1] = num;
         score[2] = ct;
-        puts("you win! - new score set");
-        return 1;
+        puts("New high score set");
+        return (int*)1;
     }
     else if (score[0] < nCount){
         score[0] = nCount;
         score[1] = num;
         score[2] = ct;
-        puts("you win! - new score set");
-        return 1;
+        puts("New high score set");
+        return (int*)1;
 
     }
     else{
         puts("you lose!");
-        return 0;
+        return (int*)0;
     }
 }
 //user can keep all of a single number per roll.
 int keepDice(int dice[]){
-    puts("keep which number?");
+    puts("\nkeep which number?");
     int number = 0;
     scanf("%d",&number);
 
