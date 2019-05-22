@@ -15,7 +15,8 @@ by multiples of the same number and the player can keep however many of the same
  each  player starts with $5 each round and has to put a dollar into the pool for each
  turn, the total winnings are calculated at the end of each round*/
 
-//make betting?
+//AI opponents
+//output formatting for clear instructions
 
 //prototypes
 int *rollDice(int);
@@ -64,28 +65,27 @@ int main()
         int sum = 0;
         int wintext = 0;
         while (sum != 1){
-            sum = 0;
             int win = 0;
             for (int i = 0; i < players; i++){
+                sum = 0;
+                 //check player status again
+                for (int j = 0; j < players; j++){
+                    if (*(pNum + j) == 1){
+                        sum++;
+                        win = j;
+                    }
+                }
+                //winning condition
                 if (sum == 1 && wintext == 0){
                     printf("\nplayer %d wins %d dollars!\n",win +1, pool);
                     *(pNum+win) = 2;
                     dollar[win] += pool;
                     wintext++;//stops repeat print
                 }
-                else{
-                    if (*(pNum + i) == 1){
-                        pool++;
-                        dollar[i]--;
-                        pNum = play(i,pNum,dollar[i]);
-                        }
-                        //check player status again
-                        for (int j = 0; j < players; j++){
-                            if (*(pNum + j) == 1){
-                            sum++;
-                            win = j;
-                        }
-                    }
+                else if (*(pNum + i) == 1){
+                    pool++;
+                    dollar[i]--;
+                    pNum = play(i,pNum,dollar[i]);
                 }
             }
         }
@@ -211,49 +211,45 @@ int * play(int player, int playerNumber[], int dollar)
     return playerNumber;
 
 }
-//next player's score compared to first player
+//next player's score compared to high score
 int *nextPlayer(int nCount, int num, int ct){
     if (score[2] < ct){
        puts("you lose!");
        return (int*)0;
     }
-    else if(score[0] == nCount){
-        if(score[1] > num){
+    else {
+        if (score[0] > nCount){
             puts("you lose!");
             return (int*)0;
         }
-        else if(score[1] == num && score[2] == ct){
-          puts("tie! - push");
-          return (int*)1;
-
-        }
         else{
-            score[0] = nCount;
-            score[1] = num;
-            score[2] = ct;
-            puts("New high score set");
-            return (int*)1;
+            if (score[0] < nCount){
+                score[0] = nCount;
+                score[1] = num;
+                score[2] = ct;
+                puts("New high score set");
+                return (int*)1;
+            }
+            else{
+                if (score[1] > num){
+                    puts("you lose!");
+                    return (int*)0;
+                }
+                else if (score[1] == num){
+                    puts("tie! - push");
+                    return (int*)1;
+                }
+                else{
+                    score[0] = nCount;
+                    score[1] = num;
+                    score[2] = ct;
+                    puts("New high score set");
+                    return (int*)1;
+                }
+            }
         }
     }
-    else if(score[2] > ct && score[1] < num && score[0] <= nCount){
-        score[0] = nCount;
-        score[1] = num;
-        score[2] = ct;
-        puts("New high score set");
-        return (int*)1;
-    }
-    else if (score[0] < nCount){
-        score[0] = nCount;
-        score[1] = num;
-        score[2] = ct;
-        puts("New high score set");
-        return (int*)1;
-
-    }
-    else{
-        puts("you lose!");
-        return (int*)0;
-    }
+    return (int*)-1;
 }
 //user can keep all of a single number per roll.
 int keepDice(int dice[]){
