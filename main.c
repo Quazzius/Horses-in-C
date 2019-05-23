@@ -15,13 +15,11 @@ by multiples of the same number and the player can keep however many of the same
  each  player starts with $5 + amount of players each round and has to put a dollar into the pool for each
  turn, the total winnings are calculated at the end of each round*/
 
-//AI opponents
-//**output formatting for clear instructions & score to beat**
-//auto detect amount of rolls to beat**
+//AI opponents?
 
 //prototypes
 void rollDice(int[], int);//rolls dice
-void play(int, int[], int, int[], int[], int); //game-play function
+void play(int,int[], int[], int[], int); //game-play function
 int nextPlayer(int,int,int,int[]);//compares scores
 int keepDice(int[]); //choose dice to keep,calculates amount kept, allocates integers
 
@@ -58,14 +56,18 @@ int main()
             //each player takes a first turn and adds a dollar to the pool
             dollar[j]--;
             pool++;
-            play(j, playerNumber, dollar[j], dice, score, playcount);
+            printf("\nplayer %d's turn\n$%d",j + 1, dollar[j]);
+            play(j,playerNumber, dice, score, playcount);
             playcount ++;
         }
         //rebuttle for player that did not lose but have not beaten the high score
         //cycle to find those who didn't lose on an roll
         int sum = 0;
+        int hold = 0;
         while (sum != 1){
+            char putIn = 'y';
             for (int i = 0; i < players; i++){
+                hold = score[0];//fixes strange disconnect bug
                 sum = 0;
                  //check player status every turn
                 for (int j = 0; j < players; j++){
@@ -81,10 +83,28 @@ int main()
                     break;
                 }
                 else if (playerNumber[i] == 1){
-                    pool++;
-                    dollar[i]--;
-                    play(i,playerNumber,dollar[i], dice, score, playcount);
-                    playcount ++;
+
+                    printf("Pot: $%d\n",pool);
+                    if (playcount >= players)
+                    {
+                        printf("\nplayer %d's turn\n$%d",i + 1, dollar[i]);
+                        puts("\nadd a dollar to roll?\ny/n");
+                        scanf("%s",&putIn);
+                    }
+                    else{
+                        printf("\nplayer %d's turn\n$%d",i + 1, dollar[i]-1);
+                    }
+                    if (putIn == 'y')
+                    {
+                        score[0] = hold;//fixes strange disconnect bug
+                        pool++;
+                        dollar[i]--;
+                        play(i, playerNumber, dice, score, playcount);
+                        playcount ++;
+                    }
+                    else{
+                        playerNumber[i] = 0;
+                    }
                 }
             }
         }
@@ -115,9 +135,8 @@ void rollDice(int dice[],int amount)
     }
 }
 //game-play structure
-void play(int player, int playerNumber[], int dollar, int dice[], int score[], int playcount)
+void play(int player,int playerNumber[], int dice[], int score[], int playcount)
 {
-    printf("\nplayer %d's turn\n$%d", player + 1, dollar);
 
     int count = 0;//how many rolls
     char keep = 'n';
