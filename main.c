@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<limits.h>
-#define SIZE 6
+#define SIZE 5
 
 /*this program simulates the dice game "horses"
 this game supports up to 10  players.the first player sets the mark and
@@ -81,6 +81,7 @@ int main()
                     *(pNum+win) = 2;
                     dollar[win] += pool;
                     wintext++;//stops repeat print
+                    break;
                 }
                 else if (*(pNum + i) == 1){
                     pool++;
@@ -143,7 +144,7 @@ int * play(int player, int playerNumber[], int dollar)
         }
     }
     //count amounts of repeating dice values
-    int most[SIZE] = {0,0,0,0,0,0};
+    int most[6] = {0,0,0,0,0,0};
     for (int i = 0; i < SIZE; i++)
     {
         switch(*(p+i))
@@ -172,7 +173,7 @@ int * play(int player, int playerNumber[], int dollar)
     //if tied, the duplicate with the highest number is chosen
     int number = 0;
     int amount = 0;
-    for (int i = 0; i < SIZE; i++)
+    for (int i = 0; i < 6; i++)
     {
         if (amount < most[i])
         {
