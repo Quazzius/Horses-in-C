@@ -63,7 +63,6 @@ int main()
         //rebuttle for player that did not lose but have not beaten the high score
         //cycle to find those who didn't lose on an roll
         int sum = 0;
-        int wintext = 0;
         while (sum != 1){
             int win = 0;
             for (int i = 0; i < players; i++){
@@ -76,11 +75,9 @@ int main()
                     }
                 }
                 //winning condition
-                if (sum == 1 && wintext == 0){
+                if (sum == 1){
                     printf("\nplayer %d wins %d dollars!\n",win +1, pool);
-                    *(pNum+win) = 2;
                     dollar[win] += pool;
-                    wintext++;//stops repeat print
                     break;
                 }
                 else if (*(pNum + i) == 1){
